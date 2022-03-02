@@ -4,6 +4,7 @@ import math
 import warnings
 from sys import maxsize
 import json
+import time
 
 """
 Most of the algo code you write will be in this file unless you create new
@@ -119,33 +120,21 @@ class AlgoStrategy(gamelib.AlgoCore):
 
     def defend(self, game_state):
 
-        build_wall_list = [[],
-                           [[x, 13] for x in range(0, 4)] + [[x, 13] for x in range(24, 28)],
-                           [[x, 10] for x in range(7, 21)],
-                           [],
-                           [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)],
-                           [],
-                           [],
-                           [],
-                           [],
-                           [],
-                           [[4, 11], [5, 10], [6, 9], [23, 11], [22, 10], [21, 9]],
-                           [[[7, 9], [20, 9]] + [[x, 9] for x in range(9, 13)] + [[x, 9] for x in range(14, 19)]]
-                           ]
+        print("****" * 4)
+        print("round NO#", game_state.turn_number)
+        print("****" * 4)
 
-        upgrade_wall_list = [[],
-                             [],
-                             [],
-                             [],
-                             [],
-                             [],
-                             [[x, 13] for x in range(0, 14)] + [[x, 13] for x in range(24, 28)],
-                             [[x, 10] for x in range(7, 21)],
-                             [],
-                             [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)],
-                             [],
-                             []
-                             ]
+        build_wall_list = [[]] * 13
+        build_wall_list[1] = [[x, 13] for x in range(0, 4)] + [[x, 13] for x in range(24, 28)]
+        build_wall_list[2] = [[x, 10] for x in range(7, 21)]
+        build_wall_list[4] = [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)]
+        build_wall_list[10] = [[4, 11], [5, 10], [6, 9], [23, 11], [22, 10], [21, 9]]
+        build_wall_list[11] = [[[7, 9], [20, 9]] + [[x, 9] for x in range(9, 13)] + [[x, 9] for x in range(14, 19)]]
+
+        upgrade_wall_list = [[]] * 13
+        upgrade_wall_list[6] = [[x, 13] for x in range(0, 14)] + [[x, 13] for x in range(24, 28)]
+        upgrade_wall_list[7] = [[x, 10] for x in range(7, 21)]
+        upgrade_wall_list[9] = [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)]
 
         build_turret_list = [[]] * 13
         build_turret_list[0] = [[2, 11], [25, 11], [13, 9]]
@@ -165,6 +154,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         # game_state.
 
         for p in range(13):
+            print("========" * 2)
+            print(p)
+            print("========" * 2)
+
             # check extra build support
             if p == 12:
                 if game_state.get_resource(MP) >= 20:
@@ -176,29 +169,37 @@ class AlgoStrategy(gamelib.AlgoCore):
                 continue
 
             # build wall
-            print(p)
+
             wall_loc = build_wall_list[p]
-            game_state.attempt_spawn(WALL, wall_loc)
+            print('wall_loc', wall_loc)
+            time.sleep(1)
+            if len(wall_loc):
+                game_state.attempt_spawn(WALL, wall_loc)
 
             # build turret
             turret_loc = build_turret_list[p]
-            game_state.attempt_spawn(TURRET, turret_loc)
+            if len(turret_loc):
+                game_state.attempt_spawn(TURRET, turret_loc)
 
             # build support
             support_loc = build_support_list[p]
-            game_state.attempt_spawn(SUPPORT, support_loc)
+            if len(support_loc):
+                game_state.attempt_spawn(SUPPORT, support_loc)
 
             # upgrade wall
             wall_loc = upgrade_wall_list[p]
-            game_state.attempt_upgrade(wall_loc)
+            if len(wall_loc):
+                game_state.attempt_upgrade(wall_loc)
 
             # upgrade turret
             turret_loc = upgrade_turret_list[p]
-            game_state.attempt_upgrade(turret_loc)
+            if len(turret_loc):
+                game_state.attempt_upgrade(turret_loc)
 
             # upgrade support
             support_loc = upgrade_support_list[p]
-            game_state.attempt_upgrade(support_loc)
+            if len(support_loc):
+                game_state.attempt_upgrade(support_loc)
 
     def build_defences(self, game_state):
         """
@@ -222,7 +223,7 @@ class AlgoStrategy(gamelib.AlgoCore):
     def build_reactive_defense(self, game_state):
         """
         This function builds reactive defenses based on where the enemy scored on us from.
-        We can track where the opponent scored by looking at events in action frames 
+        We can track where the opponent scored by looking at events in action frames
         as shown in the on_action_frame function
         """
         for location in self.scored_on_locations:
@@ -238,7 +239,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         friendly_edges = game_state.game_map.get_edge_locations(
             game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
 
-        # Remove locations that are blocked by our own structures 
+        # Remove locations that are blocked by our own structures
         # since we can't deploy units there.
         deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
 
@@ -279,7 +280,7 @@ class AlgoStrategy(gamelib.AlgoCore):
     def least_damage_spawn_location(self, game_state, location_options):
         """
         This function will help us guess which location is the safest to spawn moving units from.
-        It gets the path the unit will take then checks locations on that path to 
+        It gets the path the unit will take then checks locations on that path to
         estimate the path's damage risk.
         """
         damages = []
@@ -315,7 +316,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
     def on_action_frame(self, turn_string):
         """
-        This is the action frame of the game. This function could be called 
+        This is the action frame of the game. This function could be called
         hundreds of times per turn and could slow the algo down so avoid putting slow code here.
         Processing the action frames is complicated so we only suggest it if you have time and experience.
         Full doc on format of a game frame at in json-docs.html in the root of the Starterkit.
@@ -327,7 +328,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         for breach in breaches:
             location = breach[0]
             unit_owner_self = True if breach[4] == 1 else False
-            # When parsing the frame data directly, 
+            # When parsing the frame data directly,
             # 1 is integer for yourself, 2 is opponent (StarterKit code uses 0, 1 as player_index instead)
             if not unit_owner_self:
                 gamelib.debug_write("Got scored on at: {}".format(location))
