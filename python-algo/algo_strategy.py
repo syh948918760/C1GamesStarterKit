@@ -1,10 +1,11 @@
+import time
+
 import gamelib
 import random
 import math
 import warnings
 from sys import maxsize
 import json
-import time
 
 """
 Most of the algo code you write will be in this file unless you create new
@@ -56,7 +57,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         game_state = gamelib.GameState(self.config, turn_state)
         # game_state.attempt_spawn(DEMOLISHER, [24, 12], 2)
 
-        
         gamelib.debug_write('Performing turn {} of your custom algo strategy'.format(game_state.turn_number))
         game_state.suppress_warnings(True)  # Comment or remove this line to enable warnings.
 
@@ -80,7 +80,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         self.defend(game_state)
         self.attack(game_state)
-        
+
         """
         
         # First, place basic defenses
@@ -175,11 +175,15 @@ class AlgoStrategy(gamelib.AlgoCore):
             if len(support_loc):
                 game_state.attempt_upgrade(support_loc)
 
-
     def attack(self, game_state):
-        self.stall_with_scout(game_state)
-        
-        
+        thres = min(game_state.turn_number // 8 + 5, 20)
+
+        # 不够阈值，每轮两个破坏者伺候
+        if game_state.get_resource(MP) < thres:
+            self.stall_with_demolisher(game_state, num=2)
+        else:
+            self.stall_with_scout(game_state)
+
     def build_defences(self, game_state):
         """
         Build basic defenses using hardcoded locations.
@@ -212,28 +216,53 @@ class AlgoStrategy(gamelib.AlgoCore):
 
     def stall_with_scout(self, game_state):
         """
-        Send out scout at random locations to defend our base from enemy moving units.
+        只放置士兵在[11, 2] ][16, 2]
+        选择一个点进行放置
         """
-        # We can spawn moving units on our edges so a list of all our edge locations
-        friendly_edges = game_state.game_map.get_edge_locations(
-            game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
+        scout_spawn_location_options = [[11, 2], [16, 2]]
+        best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
 
-        # Remove locations that are blocked by our own structures
-        # since we can't deploy units there.
-        deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
+        while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(best_location) > 0:
+            game_state.attempt_spawn(SCOUT, scout_spawn_location_options)
 
-        # While we have remaining MP to spend lets send out interceptors randomly.
-        while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(deploy_locations) > 0:
-            # Choose a random deploy location.
-            deploy_index = random.randint(0, len(deploy_locations) - 1)
-            deploy_location = deploy_locations[deploy_index]
+        # 随机放置
 
-            game_state.attempt_spawn(SCOUT, deploy_location)
-            """
-            We don't have to remove the location since multiple mobile 
-            units can occupy the same space.
-            """
+        # friendly_edges = game_state.game_map.get_edge_locations(
+        #     game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
+        #
+        # deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
+        #
+        # while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(deploy_locations) > 0:
+        #     deploy_index = random.randint(0, len(deploy_locations) - 1)
+        #     deploy_location = deploy_locations[deploy_index]
+        #     game_state.attempt_spawn(SCOUT, deploy_location)
 
+    def stall_with_demolisher(self, game_state, num):
+        """
+        只放置破坏者在[11, 2] ][16, 2]
+        选择一个点进行放置
+        """
+        scout_spawn_location_options = [[11, 2], [16, 2]]
+        best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
+
+        while game_state.get_resource(MP) >= game_state.type_cost(DEMOLISHER)[MP] and len(
+                best_location) > 0 and num > 0:
+            game_state.attempt_spawn(DEMOLISHER, best_location)
+            num -= 1
+
+        # 随机放置
+
+        # friendly_edges = game_state.game_map.get_edge_locations(
+        #     game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
+        #
+        # deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
+        #
+        # while game_state.get_resource(MP) >= game_state.type_cost(DEMOLISHER)[MP] and len(
+        #         deploy_locations) > 0 and num > 0:
+        #     deploy_index = random.randint(0, len(deploy_locations) - 1)
+        #     deploy_location = deploy_locations[deploy_index]
+        #     game_state.attempt_spawn(DEMOLISHER, deploy_location)
+        #     num -= 1
 
     def stall_with_interceptors(self, game_state):
         """
