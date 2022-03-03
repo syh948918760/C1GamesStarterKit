@@ -43,16 +43,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         MP = 1
         SP = 0
 
-        # print("=====================" *2)
-        #
-        # print('WALL', WALL)
-        # print('SUPPORT', SUPPORT)
-        # print('TURRET', TURRET)
-        # print('SCOUT', SCOUT)
-        # print('DEMOLISHER', DEMOLISHER)
-        # print("=====================" *2)
-
-        # This is a good place to do initial setup
         self.scored_on_locations = []
 
     def on_turn(self, turn_state):
@@ -64,6 +54,9 @@ class AlgoStrategy(gamelib.AlgoCore):
         game engine.
         """
         game_state = gamelib.GameState(self.config, turn_state)
+        # game_state.attempt_spawn(DEMOLISHER, [24, 12], 2)
+
+        
         gamelib.debug_write('Performing turn {} of your custom algo strategy'.format(game_state.turn_number))
         game_state.suppress_warnings(True)  # Comment or remove this line to enable warnings.
 
@@ -86,6 +79,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
 
         self.defend(game_state)
+        self.attack(game_state)
+        
         """
         
         # First, place basic defenses
@@ -119,17 +114,12 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
 
     def defend(self, game_state):
-
-        print("****" * 4)
-        print("round NO#", game_state.turn_number)
-        print("****" * 4)
-
         build_wall_list = [[]] * 13
         build_wall_list[1] = [[x, 13] for x in range(0, 4)] + [[x, 13] for x in range(24, 28)]
         build_wall_list[2] = [[x, 10] for x in range(7, 21)]
         build_wall_list[4] = [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)]
-        build_wall_list[10] = [[4, 11], [5, 10], [6, 9], [23, 11], [22, 10], [21, 9]]
-        build_wall_list[11] = [[[7, 9], [20, 9]] + [[x, 9] for x in range(9, 13)] + [[x, 9] for x in range(14, 19)]]
+        build_wall_list[10] = [[4, 11], [5, 10], [6, 9], [23, 11], [22, 10]]
+        build_wall_list[11] = [[7, 9], [20, 9]] + [[x, 9] for x in range(9, 13)] + [[x, 9] for x in range(14, 19)]
 
         upgrade_wall_list = [[]] * 13
         upgrade_wall_list[6] = [[x, 13] for x in range(0, 14)] + [[x, 13] for x in range(24, 28)]
@@ -146,7 +136,8 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         build_support_list = [[]] * 13
         build_support_list[0] = [[14, 2]]
-        build_support_list[12] = [[[13, 2], [12, 3], [15, 3]], [[13, 3], [14, 3], [11, 4], [16, 4]]]
+        build_support_list[6] = [[13, 2], [12, 3], [15, 3]]
+        build_support_list[12] = [[13, 3], [14, 3], [11, 4], [16, 4]]
 
         upgrade_support_list = [[]] * 13
         upgrade_support_list[5] = [[14, 2]]
@@ -154,32 +145,15 @@ class AlgoStrategy(gamelib.AlgoCore):
         # game_state.
 
         for p in range(13):
-            print("========" * 2)
-            print(p)
-            print("========" * 2)
-
-            # check extra build support
-            if p == 12:
-                if game_state.get_resource(MP) >= 20:
-                    support_loc = build_support_list[p][0]
-                    game_state.attempt_spawn(SUPPORT, support_loc)
-                if game_state.get_resource(MP) >= 30:
-                    support_loc = build_support_list[p][1]
-                    game_state.attempt_spawn(SUPPORT, support_loc)
-                continue
-
-            # build wall
-
-            wall_loc = build_wall_list[p]
-            print('wall_loc', wall_loc)
-            time.sleep(1)
-            if len(wall_loc):
-                game_state.attempt_spawn(WALL, wall_loc)
-
             # build turret
             turret_loc = build_turret_list[p]
             if len(turret_loc):
                 game_state.attempt_spawn(TURRET, turret_loc)
+
+            # build wall
+            wall_loc = build_wall_list[p]
+            if len(wall_loc):
+                game_state.attempt_spawn(WALL, wall_loc)
 
             # build support
             support_loc = build_support_list[p]
@@ -201,6 +175,11 @@ class AlgoStrategy(gamelib.AlgoCore):
             if len(support_loc):
                 game_state.attempt_upgrade(support_loc)
 
+
+    def attack(self, game_state):
+        self.stall_with_scout(game_state)
+        
+        
     def build_defences(self, game_state):
         """
         Build basic defenses using hardcoded locations.
@@ -230,6 +209,31 @@ class AlgoStrategy(gamelib.AlgoCore):
             # Build turret one space above so that it doesn't block our own edge spawn locations
             build_location = [location[0], location[1] + 1]
             game_state.attempt_spawn(TURRET, build_location)
+
+    def stall_with_scout(self, game_state):
+        """
+        Send out scout at random locations to defend our base from enemy moving units.
+        """
+        # We can spawn moving units on our edges so a list of all our edge locations
+        friendly_edges = game_state.game_map.get_edge_locations(
+            game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
+
+        # Remove locations that are blocked by our own structures
+        # since we can't deploy units there.
+        deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
+
+        # While we have remaining MP to spend lets send out interceptors randomly.
+        while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(deploy_locations) > 0:
+            # Choose a random deploy location.
+            deploy_index = random.randint(0, len(deploy_locations) - 1)
+            deploy_location = deploy_locations[deploy_index]
+
+            game_state.attempt_spawn(SCOUT, deploy_location)
+            """
+            We don't have to remove the location since multiple mobile 
+            units can occupy the same space.
+            """
+
 
     def stall_with_interceptors(self, game_state):
         """
