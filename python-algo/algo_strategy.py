@@ -19,6 +19,37 @@ Advanced strategy tips:
   the actual current map state.
 """
 
+class defStructure:
+    def __init__(self, game_state):
+        self.ds_op = []
+        self.ds_t = []
+        self.ds_w = []
+        self.ds_s = []
+        self.gs = game_state
+
+    def add(self, op, turret_ls, wall_ls, support_ls):
+        self.ds_op.append(op)
+        self.ds_t.append(turret_ls)
+        self.ds_w.append(wall_ls)
+        self.ds_s.append(support_ls)
+
+    def deploy(self):
+        for op, turret_ls, wall_ls, support_ls in zip(self.ds_op, self.ds_t, self.ds_w, self.ds_s):
+            if op == 'build':
+                if len(turret_ls):
+                    self.gs.attempt_spawn(TURRET, turret_ls)
+                if len(wall_ls):
+                    self.gs.attempt_spawn(WALL, wall_ls)
+                if len(support_ls):
+                    self.gs.attempt_spawn(SUPPORT, support_ls)
+            else:
+                if len(turret_ls):
+                    self.gs.attempt_upgrade(turret_ls)
+                if len(wall_ls):
+                    self.gs.attempt_upgrade(wall_ls)
+                if len(support_ls):
+                    self.gs.attempt_upgrade(support_ls)
+
 
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
@@ -114,66 +145,105 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
 
     def defend(self, game_state):
-        build_wall_list = [[]] * 13
-        build_wall_list[1] = [[x, 13] for x in range(0, 4)] + [[x, 13] for x in range(24, 28)]
-        build_wall_list[2] = [[x, 10] for x in range(7, 21)]
-        build_wall_list[4] = [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)]
-        build_wall_list[10] = [[4, 11], [5, 10], [6, 9], [23, 11], [22, 10]]
-        build_wall_list[11] = [[7, 9], [20, 9]] + [[x, 9] for x in range(9, 13)] + [[x, 9] for x in range(14, 19)]
+        ds = defStructure(game_state)
+        ds.add('build', [[2, 11], [25, 11]], [], [])
+        ds.add('build', [[8, 9], [19, 9]], [], [])
+        ds.add('build', [[12, 9], [15, 9]], [], [])
+        ds.add('build', [[5, 9], [22, 9]], [], [])
+        ds.add('build', [], [[0,13], [1,13], [2,13]], [])
+        ds.add('build', [], [[27,13], [26,13], [25,13]], [])
+        ds.add('build', [], [[1,12], [26,12]], [])
+        ds.add('build', [], [[3,12], [4,11], [5,10]], [])
+        ds.add('build', [], [[24,12], [23,11], [22,10]], [])
+        ds.add('build', [], [[x, 10] for x in range(6, 21)], [])
+        ds.add('upgrade', [[2, 11], [25, 11]], [], [])
+        ds.add('upgrade', [[8, 9], [19, 9]], [], [])
+        ds.add('upgrade', [], [[0,13], [1,13], [2,13]], [])
+        ds.add('upgrade', [], [[27,13], [26,13], [25,13]], [])
+        ds.add('upgrade', [], [[1,12], [26,12]], [])
+        ds.add('upgrade', [[12, 9], [15, 9]], [], [])
+        ds.add('upgrade', [[5, 9], [22, 9]], [], [])
+        ds.add('upgrade', [], [[3,12], [4,11], [5,10]], [])
+        ds.add('upgrade', [], [[24,12], [23,11], [22,10]], [])
+        # ds.add('build', [], [[x, 10] for x in range(6, 21)], [])
+        ds.add('build', [[9, 9], [18, 9]], [], [])
+        ds.add('build', [[11, 9], [16, 9]], [], [])
+        ds.add('upgrade', [], [[x, 10] for x in range(6, 21)], [])
+        ds.add('upgrade', [[9, 9], [18, 9]], [], [])
+        ds.add('upgrade', [[11, 9], [16, 9]], [], [])
+        ds.add('build', [], [], [[13, 1], [14, 1]])
+        ds.add('build', [], [], [[13, 2], [14, 2]])
+        ds.add('build', [], [], [[12, 3], [15, 3]])
+        ds.add('build', [], [], [[11, 4], [16, 4]])
+        ds.add('build', [[2, 12], [25, 12]], [], [])
+        ds.add('build', [[3, 11], [24, 11]], [], [])
+        ds.add('upgrade', [[2, 12], [25, 12]], [], [])
+        ds.add('upgrade', [[3, 11], [24, 11]], [], [])
+        ds.add('build', [], [], [[10, 5], [17, 5]])
+        ds.add('build', [], [], [[9, 6], [18, 6]])
+        ds.add('build', [], [], [[8, 7], [19, 7]])
+        ds.add('build', [], [], [[7, 8], [20, 8]])
+        ds.deploy()
+        # build_wall_list = [[]] * 13
+        # build_wall_list[1] = [[x, 13] for x in range(0, 4)] + [[x, 13] for x in range(24, 28)]
+        # build_wall_list[2] = [[x, 10] for x in range(7, 21)]
+        # build_wall_list[4] = [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)]
+        # build_wall_list[10] = [[4, 11], [5, 10], [6, 9], [23, 11], [22, 10]]
+        # build_wall_list[11] = [[7, 9], [20, 9]] + [[x, 9] for x in range(9, 13)] + [[x, 9] for x in range(14, 19)]
 
-        upgrade_wall_list = [[]] * 13
-        upgrade_wall_list[6] = [[x, 13] for x in range(0, 14)] + [[x, 13] for x in range(24, 28)]
-        upgrade_wall_list[7] = [[x, 10] for x in range(7, 21)]
-        upgrade_wall_list[9] = [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)]
+        # upgrade_wall_list = [[]] * 13
+        # upgrade_wall_list[6] = [[x, 13] for x in range(0, 14)] + [[x, 13] for x in range(24, 28)]
+        # upgrade_wall_list[7] = [[x, 10] for x in range(7, 21)]
+        # upgrade_wall_list[9] = [[x, 12] for x in range(1, 5)] + [[x, 12] for x in range(23, 27)]
 
-        build_turret_list = [[]] * 13
-        build_turret_list[0] = [[2, 11], [25, 11], [13, 9]]
-        build_turret_list[3] = [[8, 9], [19, 9]]
+        # build_turret_list = [[]] * 13
+        # build_turret_list[0] = [[2, 11], [25, 11], [13, 9]]
+        # build_turret_list[3] = [[8, 9], [19, 9]]
 
-        upgrade_turret_list = [[]] * 13
-        upgrade_turret_list[5] = [[2, 11], [25, 11], [13, 9]]
-        upgrade_turret_list[8] = [[8, 9], [19, 9]]
+        # upgrade_turret_list = [[]] * 13
+        # upgrade_turret_list[5] = [[2, 11], [25, 11], [13, 9]]
+        # upgrade_turret_list[8] = [[8, 9], [19, 9]]
 
-        build_support_list = [[]] * 13
-        build_support_list[0] = [[14, 2]]
-        build_support_list[6] = [[13, 2], [12, 3], [15, 3]]
-        build_support_list[12] = [[13, 3], [14, 3], [11, 4], [16, 4]]
+        # build_support_list = [[]] * 13
+        # build_support_list[0] = [[14, 2]]
+        # build_support_list[6] = [[13, 2], [12, 3], [15, 3]]
+        # build_support_list[12] = [[13, 3], [14, 3], [11, 4], [16, 4]]
 
-        upgrade_support_list = [[]] * 13
-        upgrade_support_list[5] = [[14, 2]]
+        # upgrade_support_list = [[]] * 13
+        # upgrade_support_list[5] = [[14, 2]]
 
-        # game_state.
+        # # game_state.
 
-        for p in range(13):
-            # build turret
-            turret_loc = build_turret_list[p]
-            if len(turret_loc):
-                game_state.attempt_spawn(TURRET, turret_loc)
+        # for p in range(13):
+        #     # build turret
+        #     turret_loc = build_turret_list[p]
+        #     if len(turret_loc):
+        #         game_state.attempt_spawn(TURRET, turret_loc)
 
-            # build wall
-            wall_loc = build_wall_list[p]
-            if len(wall_loc):
-                game_state.attempt_spawn(WALL, wall_loc)
+        #     # build wall
+        #     wall_loc = build_wall_list[p]
+        #     if len(wall_loc):
+        #         game_state.attempt_spawn(WALL, wall_loc)
 
-            # build support
-            support_loc = build_support_list[p]
-            if len(support_loc):
-                game_state.attempt_spawn(SUPPORT, support_loc)
+        #     # build support
+        #     support_loc = build_support_list[p]
+        #     if len(support_loc):
+        #         game_state.attempt_spawn(SUPPORT, support_loc)
 
-            # upgrade wall
-            wall_loc = upgrade_wall_list[p]
-            if len(wall_loc):
-                game_state.attempt_upgrade(wall_loc)
+        #     # upgrade wall
+        #     wall_loc = upgrade_wall_list[p]
+        #     if len(wall_loc):
+        #         game_state.attempt_upgrade(wall_loc)
 
-            # upgrade turret
-            turret_loc = upgrade_turret_list[p]
-            if len(turret_loc):
-                game_state.attempt_upgrade(turret_loc)
+        #     # upgrade turret
+        #     turret_loc = upgrade_turret_list[p]
+        #     if len(turret_loc):
+        #         game_state.attempt_upgrade(turret_loc)
 
-            # upgrade support
-            support_loc = upgrade_support_list[p]
-            if len(support_loc):
-                game_state.attempt_upgrade(support_loc)
+        #     # upgrade support
+        #     support_loc = upgrade_support_list[p]
+        #     if len(support_loc):
+        #         game_state.attempt_upgrade(support_loc)
 
 
     def attack(self, game_state):
