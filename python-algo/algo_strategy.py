@@ -1,10 +1,11 @@
+import time
+
 import gamelib
 import random
 import math
 import warnings
 from sys import maxsize
 import json
-import time
 
 """
 Most of the algo code you write will be in this file unless you create new
@@ -19,6 +20,7 @@ Advanced strategy tips:
   the actual current map state.
 """
 
+
 class defStructure:
     def __init__(self):
         self.ds_op = []
@@ -26,42 +28,63 @@ class defStructure:
         self.ds_w = []
         self.ds_s = []
 
+        self.ds_door = [[6, 8], [6, 9]]
+
         self.add('build', [[2, 11], [25, 11]], [], [])
         self.add('build', [[8, 9], [19, 9]], [], [])
         self.add('build', [[12, 9], [15, 9]], [], [])
         self.add('build', [[5, 9], [22, 9]], [], [])
-        self.add('build', [], [[0,13], [1,13], [2,13]], [])
-        self.add('build', [], [[27,13], [26,13], [25,13]], [])
-        self.add('build', [], [[1,12], [26,12]], [])
-        self.add('build', [], [[3,12], [4,11], [5,10]], [])
-        self.add('build', [], [[24,12], [23,11], [22,10]], [])
-        self.add('build', [], [[x, 10] for x in range(6, 21)], [])
+        self.add('build', [], [[0, 13], [1, 13], [2, 13]], [])
+        self.add('build', [], [[27, 13], [26, 13], [25, 13]], [])
+        self.add('build', [], [[1, 12], [26, 12]], [])
+        self.add('build', [], [[3, 12], [4, 11], [5, 10]], [])
+        self.add('build', [], [[24, 12], [23, 11], [22, 10]], [])
+
+        self.add('build', [],
+                 [[7, 10], [21, 10], [8, 10], [20, 10], [9, 10], [19, 10], [10, 10], [18, 10], [11, 10], [17, 10],
+                  [12, 10], [16, 10], [13, 10], [15, 10], [14, 10]], [])
+
         self.add('upgrade', [[2, 11], [25, 11]], [], [])
         self.add('upgrade', [[8, 9], [19, 9]], [], [])
-        self.add('upgrade', [], [[0,13], [1,13], [2,13]], [])
-        self.add('upgrade', [], [[27,13], [26,13], [25,13]], [])
-        self.add('upgrade', [], [[1,12], [26,12]], [])
+        self.add('build', [], [], [[8, 8], [8, 7]])
+
+        self.add('upgrade', [], [[0, 13], [1, 13], [2, 13]], [])
+        self.add('upgrade', [], [[27, 13], [26, 13], [25, 13]], [])
+        self.add('upgrade', [], [[1, 12], [26, 12]], [])
         self.add('upgrade', [[12, 9], [15, 9]], [], [])
         self.add('upgrade', [[5, 9], [22, 9]], [], [])
-        self.add('upgrade', [], [[3,12], [4,11], [5,10]], [])
-        self.add('upgrade', [], [[24,12], [23,11], [22,10]], [])
-        self.add('build', [[9, 9], [18, 9]], [], [])
-        self.add('build', [[11, 9], [16, 9]], [], [])
-        self.add('upgrade', [], [[x, 10] for x in range(6, 21)], [])
-        self.add('upgrade', [[9, 9], [18, 9]], [], [])
-        self.add('upgrade', [[11, 9], [16, 9]], [], [])
-        self.add('build', [], [], [[13, 1], [14, 1]])
-        self.add('build', [], [], [[13, 2], [14, 2]])
-        self.add('build', [], [], [[12, 3], [15, 3]])
-        self.add('build', [], [], [[11, 4], [16, 4]])
+        self.add('upgrade', [], [[3, 12], [4, 11], [5, 10]], [])
+        self.add('upgrade', [], [[24, 12], [23, 11], [22, 10]], [])
+
+        self.add('build', [[9, 9], [7, 8]], [], [])
+        self.add('build', [[11, 9], [7, 9], [18, 9]], [], [])
+
+        self.add('upgrade', [],
+                 [[7, 10], [21, 10], [8, 10], [20, 10], [9, 10], [19, 10], [10, 10], [18, 10], [11, 10], [17, 10],
+                  [12, 10], [16, 10], [13, 10], [15, 10], [14, 10]], [])
+        self.add('upgrade', [[9, 9], [7, 8]], [], [])
+        self.add('upgrade', [[11, 9], [7, 9], [18, 9]], [], [])
+
         self.add('build', [[2, 12], [25, 12]], [], [])
         self.add('build', [[3, 11], [24, 11]], [], [])
         self.add('upgrade', [[2, 12], [25, 12]], [], [])
         self.add('upgrade', [[3, 11], [24, 11]], [], [])
-        self.add('build', [], [], [[10, 5], [17, 5]])
-        self.add('build', [], [], [[9, 6], [18, 6]])
-        self.add('build', [], [], [[8, 7], [19, 7]])
-        self.add('build', [], [], [[7, 8], [20, 8]])
+
+        self.add('build', [[14, 9]], [], [])
+        self.add('upgrade', [[14, 9]], [], [])
+        self.add('upgrade', [], [], [[8, 8], [8, 7]])
+        self.add('build', [], [], [[10, 5], [9, 6]])
+        self.add('build', [], [], [[11, 4], [12, 3]])
+        self.add('build', [], [], [[14, 2], [13, 2]])
+        self.add('build', [], [], [[13, 3], [12, 4]])
+        self.add('build', [], [], [[11, 5], [10, 6]])
+        self.add('build', [], [], [[9, 7]])
+        self.add('upgrade', [], [], [[9, 7]])
+        self.add('upgrade', [], [], [[10, 6], [9, 6]])
+        self.add('upgrade', [], [], [[11, 5], [10, 5]])
+        self.add('upgrade', [], [], [[11, 4], [12, 4]])
+        self.add('upgrade', [], [], [[12, 3], [13, 3]])
+        self.add('upgrade', [], [], [[14, 2], [13, 2]])
 
     def add(self, op, turret_ls, wall_ls, support_ls):
         self.ds_op.append(op)
@@ -89,6 +112,11 @@ class defStructure:
                 if (not st.upgraded) and (st.health < 0.9 * st.max_health):
                     game_state.attempt_remove(wall)
 
+    def processAttackSig(self, this_round_attack, next_round_attack, game_state):
+        if not this_round_attack:
+            game_state.attempt_spawn(WALL, self.ds_door)
+        if next_round_attack:
+            game_state.attempt_remove(self.ds_door)
 
     def deploy(self, game_state):
         for op, turret_ls, wall_ls, support_ls in zip(self.ds_op, self.ds_t, self.ds_w, self.ds_s):
@@ -146,7 +174,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         game_state = gamelib.GameState(self.config, turn_state)
         # game_state.attempt_spawn(DEMOLISHER, [24, 12], 2)
 
-        
         gamelib.debug_write('Performing turn {} of your custom algo strategy'.format(game_state.turn_number))
         game_state.suppress_warnings(True)  # Comment or remove this line to enable warnings.
 
@@ -168,9 +195,9 @@ class AlgoStrategy(gamelib.AlgoCore):
         If there are no stationary units to attack in the front, we will send Scouts to try and score quickly.
         """
 
-        self.defend(game_state)
-        self.attack(game_state)
-        
+        cur_flag, future_flag = self.attack(game_state)
+        self.defend(game_state, cur_flag, future_flag)
+
         """
         
         # First, place basic defenses
@@ -203,14 +230,24 @@ class AlgoStrategy(gamelib.AlgoCore):
                 game_state.attempt_spawn(SUPPORT, support_locations)
         """
 
-    def defend(self, game_state):
+    def defend(self, game_state, cur_flag, future_flag):
+        self.ds.processAttackSig(cur_flag, future_flag, game_state)
         self.ds.rebuild(game_state)
         self.ds.deploy(game_state)
 
     def attack(self, game_state):
-        self.stall_with_scout(game_state)
-        
-        
+        cur_flag = False
+        future_flag = False
+        if game_state.turn_number % 4 == 0:
+            self.stall_with_demolisher(game_state, 100)
+            cur_flag = True
+        if game_state.turn_number % 4 == 2:
+            self.stall_with_scout(game_state)
+            cur_flag = True
+
+        future_flag = not cur_flag
+        return cur_flag, future_flag
+
     def build_defences(self, game_state):
         """
         Build basic defenses using hardcoded locations.
@@ -243,52 +280,60 @@ class AlgoStrategy(gamelib.AlgoCore):
 
     def stall_with_scout(self, game_state):
         """
-        Send out scout at random locations to defend our base from enemy moving units.
+        只放置士兵在[11, 2] ][16, 2]
+        选择一个点进行放置
         """
-        # We can spawn moving units on our edges so a list of all our edge locations
-        friendly_edges = game_state.game_map.get_edge_locations(
-            game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
+        scout_spawn_location_options = [[11, 2]]
+        best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
 
-        # Remove locations that are blocked by our own structures
-        # since we can't deploy units there.
-        deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
+        while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(best_location) > 0:
+            game_state.attempt_spawn(SCOUT, scout_spawn_location_options)
 
-        # While we have remaining MP to spend lets send out interceptors randomly.
-        while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(deploy_locations) > 0:
-            # Choose a random deploy location.
-            deploy_index = random.randint(0, len(deploy_locations) - 1)
-            deploy_location = deploy_locations[deploy_index]
-
-            game_state.attempt_spawn(SCOUT, deploy_location)
-            """
-            We don't have to remove the location since multiple mobile 
-            units can occupy the same space.
-            """
-
-
-    def stall_with_interceptors(self, game_state):
+    def stall_with_demolisher(self, game_state, num):
         """
-        Send out interceptors at random locations to defend our base from enemy moving units.
+        只放置破坏者在[11, 2] ][16, 2]
+        选择一个点进行放置
         """
-        # We can spawn moving units on our edges so a list of all our edge locations
-        friendly_edges = game_state.game_map.get_edge_locations(
-            game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
+        scout_spawn_location_options = [[11, 2]]
+        best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
 
-        # Remove locations that are blocked by our own structures
-        # since we can't deploy units there.
-        deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
+        while game_state.get_resource(MP) >= game_state.type_cost(DEMOLISHER)[MP] and len(
+                best_location) > 0 and num > 0:
+            game_state.attempt_spawn(DEMOLISHER, best_location)
+            num -= 1
 
-        # While we have remaining MP to spend lets send out interceptors randomly.
-        while game_state.get_resource(MP) >= game_state.type_cost(INTERCEPTOR)[MP] and len(deploy_locations) > 0:
-            # Choose a random deploy location.
-            deploy_index = random.randint(0, len(deploy_locations) - 1)
-            deploy_location = deploy_locations[deploy_index]
+    def stall_with_interceptors(self, game_state, num):
+        interceptor_spawn_location_options = [[9, 4]]
+        best_location = self.least_damage_spawn_location(game_state, interceptor_spawn_location_options)
 
-            game_state.attempt_spawn(INTERCEPTOR, deploy_location)
-            """
-            We don't have to remove the location since multiple mobile 
-            units can occupy the same space.
-            """
+        while game_state.get_resource(MP) >= game_state.type_cost(INTERCEPTOR)[MP] and len(
+                best_location) > 0 and num > 0:
+            game_state.attempt_spawn(INTERCEPTOR, interceptor_spawn_location_options)
+            num -= 1
+
+    # def stall_with_interceptors(self, game_state):
+    #     """
+    #     Send out interceptors at random locations to defend our base from enemy moving units.
+    #     """
+    #     # We can spawn moving units on our edges so a list of all our edge locations
+    #     friendly_edges = game_state.game_map.get_edge_locations(
+    #         game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
+    #
+    #     # Remove locations that are blocked by our own structures
+    #     # since we can't deploy units there.
+    #     deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
+    #
+    #     # While we have remaining MP to spend lets send out interceptors randomly.
+    #     while game_state.get_resource(MP) >= game_state.type_cost(INTERCEPTOR)[MP] and len(deploy_locations) > 0:
+    #         # Choose a random deploy location.
+    #         deploy_index = random.randint(0, len(deploy_locations) - 1)
+    #         deploy_location = deploy_locations[deploy_index]
+    #
+    #         game_state.attempt_spawn(INTERCEPTOR, deploy_location)
+    #         """
+    #         We don't have to remove the location since multiple mobile
+    #         units can occupy the same space.
+    #         """
 
     def demolisher_line_strategy(self, game_state):
         """
