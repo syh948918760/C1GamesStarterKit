@@ -227,28 +227,18 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.ds.deploy(game_state)
 
     def attack(self, game_state):
-        flag = False
-        if game_state.turn_number >= 70:
-            if game_state.turn_number % 4 == 0:
-                self.stall_with_demolisher(game_state, 100)
-                flag = True
-            if game_state.turn_number % 4 == 2:
-                self.stall_with_scout(game_state)
-                flag = True
+        cur_flag = False
+        future_flag = False
+        if game_state.turn_number % 4 == 0:
+            self.stall_with_demolisher(game_state, 100)
+            cur_flag = True
+        if game_state.turn_number % 4 == 2:
+            self.stall_with_scout(game_state)
+            cur_flag = True
 
-        else:
-            thres = max(game_state.turn_number // 8 + 5, 15)
-            # 不够阈值，每轮两个破坏者伺候
-            if game_state.turn_number % 3:
-                if game_state.get_resource(MP) < thres:
-                    num = game_state.turn_number // 15 + 3 if game_state.turn_number <= 70 else 100
-                    self.stall_with_demolisher(game_state, num)
-                else:
-                    self.stall_with_scout(game_state)
-             = True
-        if flag == False:
-            num = 0 if game_state.turn_number <= 50 else 1
-            self.stall_with_interceptors(game_state, num)
+        future_flag = not cur_flag
+        return cur_flag, future_flag
+
 
     def build_defences(self, game_state):
         """
