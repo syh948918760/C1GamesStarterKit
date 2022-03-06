@@ -28,7 +28,7 @@ class defStructure:
         self.ds_w = []
         self.ds_s = []
 
-        self.ds_door = [[22, 10]]
+        # self.ds_door = [[22, 10]]
 
         self.add('build', [[1, 12], [25, 12], [23, 11], [20, 10]], [[0, 13], [26, 13], [27, 13], [2, 11], [24, 11], [3, 10], [4, 9], [19, 9], [5, 8], [18, 8], [6, 7], [17, 7], [7, 6], [8, 6], [9, 6], [16, 6], [10, 5], [15, 5], [11, 4], [14, 4], [12, 3], [13, 3]], [])
         
@@ -80,11 +80,11 @@ class defStructure:
     #             if (not st.upgraded) and (st.health < 0.9 * st.max_health):
     #                 game_state.attempt_remove(wall)
 
-    def processAttackSig(self, this_round_attack, next_round_attack, game_state):
-        if not this_round_attack:
-            game_state.attempt_spawn(WALL, self.ds_door)
-        if next_round_attack:
-            game_state.attempt_remove(self.ds_door)
+    # def processAttackSig(self, this_round_attack, next_round_attack, game_state):
+    #     if not this_round_attack:
+    #         game_state.attempt_spawn(WALL, self.ds_door)
+    #     if next_round_attack:
+    #         game_state.attempt_remove(self.ds_door)
 
     def deploy(self, game_state):
         for op, turret_ls, wall_ls, support_ls in zip(self.ds_op, self.ds_t, self.ds_w, self.ds_s):
@@ -199,20 +199,20 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
 
     def defend(self, game_state, cur_flag, future_flag):
-        self.ds.processAttackSig(cur_flag, future_flag, game_state)
+        # self.ds.processAttackSig(cur_flag, future_flag, game_state)
         # self.ds.rebuild(game_state)
         self.ds.deploy(game_state)
 
     def attack(self, game_state):
         others_mp = game_state.get_resource(MP, 1)
-
+        self.stall_with_interceptors(game_state, others_mp // 6)
+        
         cur_flag = False
         future_flag = False
         if game_state.turn_number % 4 == 0:
             self.stall_with_demolisher(game_state, 100)
             cur_flag = True
         if game_state.turn_number % 4 == 2:
-            self.stall_with_interceptors(game_state, others_mp // 6)
             self.stall_with_scout(game_state)
             cur_flag = True
 
