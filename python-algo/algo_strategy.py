@@ -28,61 +28,50 @@ class defStructure:
         self.ds_w = []
         self.ds_s = []
 
-        self.add('build', [[2, 11], [25, 11]], [], [])
-        self.add('build', [[8, 9], [19, 9]], [], [])
-        self.add('build', [[12, 9], [15, 9]], [], [])
-        self.add('build', [[5, 9], [22, 9]], [], [])
-        self.add('build', [], [[0, 13], [1, 13], [2, 13]], [])
-        self.add('build', [], [[27, 13], [26, 13], [25, 13]], [])
-        self.add('build', [], [[1, 12], [26, 12]], [])
-        self.add('build', [], [[3, 12], [4, 11], [5, 10]], [])
-        self.add('build', [], [[24, 12], [23, 11], [22, 10]], [])
+        # self.ds_door = [[22, 10]]
 
-        self.add('build', [],
-                 [[7, 10], [21, 10], [8, 10], [20, 10], [9, 10], [19, 10], [10, 10], [18, 10], [11, 10], [17, 10],
-                  [12, 10], [16, 10], [13, 10], [15, 10], [14, 10]], [])
+        self.important_structure = []
 
-        self.add('upgrade', [[2, 11], [25, 11]], [], [])
-        self.add('upgrade', [[8, 9], [19, 9]], [], [])
-        self.add('build', [], [], [[8, 8], [8, 7]])
+        self.add('build', [[1, 12], [25, 12], [23, 11], [20, 10]],
+                 [[0, 13], [26, 13], [27, 13], [2, 11], [24, 11], [3, 10], [4, 9], [19, 9], [5, 8], [18, 8], [6, 7],
+                  [17, 7], [7, 6], [8, 6], [9, 6], [16, 6], [10, 5], [15, 5], [11, 4], [14, 4], [12, 3], [13, 3]], [])
 
-        self.add('upgrade', [], [[0, 13], [1, 13], [2, 13]], [])
-        self.add('upgrade', [], [[27, 13], [26, 13], [25, 13]], [])
-        self.add('upgrade', [], [[1, 12], [26, 12]], [])
-        self.add('upgrade', [[12, 9], [15, 9]], [], [])
-        self.add('upgrade', [[5, 9], [22, 9]], [], [])
-        self.add('upgrade', [], [[3, 12], [4, 11], [5, 10]], [])
-        self.add('upgrade', [], [[24, 12], [23, 11], [22, 10]], [])
+        self.add('build', [[23, 12], [21, 11], [25, 11]], [[24, 13], [24, 12], [26, 12]], [])
+        self.add('build', [], [[1, 13], [2, 13]], [])
+        self.add('build', [[2, 12]], [], [])
 
-        self.add('build', [[9, 9], [7, 8]], [], [])
-        self.add('build', [[11, 9], [7, 9], [18, 9]], [], [])
+        self.add('build', [[21, 12], [19, 11], [20, 11]],
+                 [[23, 13], [25, 13], [18, 12], [19, 12], [20, 12]], [])
+
+        self.add('upgrade', [], [[0, 13], [26, 13], [27, 13], [2, 11], [3, 10], [4, 9]], [])
+
+        self.add('build', [[21, 10], [23, 10], [23, 9], [22, 8]],
+                 [[24, 10]], [])
+
+        self.add('upgrade', [[1, 12]], [], [])
+
+        self.add('upgrade',
+                 [[1, 12], [25, 12], [23, 12], [19, 11], [20, 10], [21, 12], [23, 11], [21, 11], [25, 11], [20, 11],
+                  [21, 10], [23, 10], [23, 9], [22, 8]], [], [])
+
+        self.add('upgrade', [], [[1, 13], [2, 13]], [])
+        self.add('upgrade', [[2, 12]], [], [])
 
         self.add('upgrade', [],
-                 [[7, 10], [21, 10], [8, 10], [20, 10], [9, 10], [19, 10], [10, 10], [18, 10], [11, 10], [17, 10],
-                  [12, 10], [16, 10], [13, 10], [15, 10], [14, 10]], [])
-        self.add('upgrade', [[9, 9], [7, 8]], [], [])
-        self.add('upgrade', [[11, 9], [7, 9], [18, 9]], [], [])
+                 [[23, 13], [24, 13], [25, 13], [18, 12], [19, 12], [20, 12], [24, 12], [24, 11],
+                  [26, 12], [24, 10]], [])
 
-        self.add('build', [[2, 12], [25, 12]], [], [])
-        self.add('build', [[3, 11], [24, 11]], [], [])
-        self.add('upgrade', [[2, 12], [25, 12]], [], [])
-        self.add('upgrade', [[3, 11], [24, 11]], [], [])
+        self.add('build', [], [], [[15, 6]])
 
-        self.add('build', [[14, 9]], [], [])
-        self.add('upgrade', [[14, 9]], [], [])
-        self.add('upgrade', [], [], [[8, 8], [8, 7]])
-        self.add('build', [], [], [[10, 5], [9, 6]])
-        self.add('build', [], [], [[11, 4], [12, 3]])
-        self.add('build', [], [], [[14, 2], [13, 2]])
-        self.add('build', [], [], [[13, 3], [12, 4]])
-        self.add('build', [], [], [[11, 5], [10, 6]])
-        self.add('build', [], [], [[9, 7]])
-        self.add('upgrade', [], [], [[9, 7]])
-        self.add('upgrade', [], [], [[10, 6], [9, 6]])
-        self.add('upgrade', [], [], [[11, 5], [10, 5]])
-        self.add('upgrade', [], [], [[11, 4], [12, 4]])
-        self.add('upgrade', [], [], [[12, 3], [13, 3]])
-        self.add('upgrade', [], [], [[14, 2], [13, 2]])
+        self.add('build', [[19, 8], [18, 7], [21, 7], [17, 6], [20, 6], [20, 9]], [], [])
+
+        self.add('upgrade', [[19, 8], [18, 7], [21, 7], [17, 6], [20, 6], [20, 9]], [], [])
+
+        self.add('build', [], [], [[19, 10], [18, 9], [17, 8], [16, 7], [15, 6], [14, 5]])
+
+        self.add('build', [], [], [[18, 10], [17, 9], [16, 8], [15, 7], [14, 6], [13, 5], [12, 4]])
+
+        self.add('upgrade', [], [], [[18, 10], [17, 9], [16, 8], [15, 7], [14, 6], [13, 5], [12, 4]])
 
     def add(self, op, turret_ls, wall_ls, support_ls):
         self.ds_op.append(op)
@@ -90,25 +79,31 @@ class defStructure:
         self.ds_w.append(wall_ls)
         self.ds_s.append(support_ls)
 
-    def rebuild(self, game_state):
-        for turret_ls in self.ds_t:
-            for turret in turret_ls:
-                st = game_state.contains_stationary_unit(turret)
-                if st == False:
-                    continue
-                if (st.upgraded) and (st.health < 0.5 * st.max_health):
-                    game_state.attempt_remove(turret)
-                if (not st.upgraded) and (st.health < 0.8 * st.max_health):
-                    game_state.attempt_remove(turret)
-        for wall_ls in self.ds_w:
-            for wall in wall_ls:
-                st = game_state.contains_stationary_unit(wall)
-                if st == False:
-                    continue
-                if (st.upgraded) and (st.health < 0.75 * st.max_health):
-                    game_state.attempt_remove(wall)
-                if (not st.upgraded) and (st.health < 0.9 * st.max_health):
-                    game_state.attempt_remove(wall)
+    # def rebuild(self, game_state):
+    #     for turret_ls in self.ds_t:
+    #         for turret in turret_ls:
+    #             st = game_state.contains_stationary_unit(turret)
+    #             if st == False:
+    #                 continue
+    #             if (st.upgraded) and (st.health < 0.5 * st.max_health):
+    #                 game_state.attempt_remove(turret)
+    #             if (not st.upgraded) and (st.health < 0.8 * st.max_health):
+    #                 game_state.attempt_remove(turret)
+    #     for wall_ls in self.ds_w:
+    #         for wall in wall_ls:
+    #             st = game_state.contains_stationary_unit(wall)
+    #             if st == False:
+    #                 continue
+    #             if (st.upgraded) and (st.health < 0.75 * st.max_health):
+    #                 game_state.attempt_remove(wall)
+    #             if (not st.upgraded) and (st.health < 0.9 * st.max_health):
+    #                 game_state.attempt_remove(wall)
+
+    # def processAttackSig(self, this_round_attack, next_round_attack, game_state):
+    #     if not this_round_attack:
+    #         game_state.attempt_spawn(WALL, self.ds_door)
+    #     if next_round_attack:
+    #         game_state.attempt_remove(self.ds_door)
 
     def deploy(self, game_state):
         for op, turret_ls, wall_ls, support_ls in zip(self.ds_op, self.ds_t, self.ds_w, self.ds_s):
@@ -136,8 +131,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         gamelib.debug_write('Random seed: {}'.format(seed))
 
     def on_game_start(self, config):
-        """ 
-        Read in config and perform any initial setup here 
+        """
+        Read in config and perform any initial setup here
         """
         gamelib.debug_write('Configuring your custom algo strategy...')
         self.config = config
@@ -187,11 +182,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         If there are no stationary units to attack in the front, we will send Scouts to try and score quickly.
         """
 
-        self.defend(game_state)
-        self.attack(game_state)
+        cur_flag, future_flag = self.attack(game_state)
+        self.defend(game_state, cur_flag, future_flag)
 
         """
-        
+
         # First, place basic defenses
         self.build_defences(game_state)
         # Now build reactive defenses based on where the enemy scored
@@ -222,11 +217,15 @@ class AlgoStrategy(gamelib.AlgoCore):
                 game_state.attempt_spawn(SUPPORT, support_locations)
         """
 
-    def defend(self, game_state):
-        self.ds.rebuild(game_state)
+    def defend(self, game_state, cur_flag, future_flag):
+        # self.ds.processAttackSig(cur_flag, future_flag, game_state)
+        # self.ds.rebuild(game_state)
         self.ds.deploy(game_state)
 
     def attack(self, game_state):
+        others_mp = game_state.get_resource(MP, 1)
+        self.stall_with_interceptors(game_state, others_mp // 10)
+
         cur_flag = False
         future_flag = False
         if game_state.turn_number % 4 == 0:
@@ -238,7 +237,6 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         future_flag = not cur_flag
         return cur_flag, future_flag
-
 
     def build_defences(self, game_state):
         """
@@ -275,7 +273,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         只放置士兵在[11, 2] ][16, 2]
         选择一个点进行放置
         """
-        scout_spawn_location_options = [[11, 2], [16, 2]]
+        scout_spawn_location_options = [[8, 5]]
         best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
 
         while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(best_location) > 0:
@@ -286,7 +284,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         只放置破坏者在[11, 2] ][16, 2]
         选择一个点进行放置
         """
-        scout_spawn_location_options = [[11, 2], [16, 2]]
+        scout_spawn_location_options = [[8, 5]]
         best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
 
         while game_state.get_resource(MP) >= game_state.type_cost(DEMOLISHER)[MP] and len(
@@ -295,7 +293,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             num -= 1
 
     def stall_with_interceptors(self, game_state, num):
-        interceptor_spawn_location_options = [[9, 4]]
+        interceptor_spawn_location_options = [[19, 5]]
         best_location = self.least_damage_spawn_location(game_state, interceptor_spawn_location_options)
 
         while game_state.get_resource(MP) >= game_state.type_cost(INTERCEPTOR)[MP] and len(
