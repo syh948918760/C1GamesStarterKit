@@ -20,6 +20,48 @@ Advanced strategy tips:
   the actual current map state.
 """
 
+class atkStructure:
+    def __init__(self):
+        self.as_op = []
+        self.as_t = []
+        self.as_w = []
+        self.as_s = []
+
+        self.add('build', [], [[0, 13], [22, 13], [23, 13], [24, 13], [25, 13], [1, 12], [2, 11], [3, 10], [4, 9], [5, 8], [6, 7], [7, 6], [8, 5], [9, 4], [15, 4], [10, 3], [14, 3], [11, 2], [13, 2], [12, 1]], [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8], [19, 7], [18, 6], [17, 5], [16, 4]])
+
+    def add(self, op, turret_ls, wall_ls, support_ls):
+        self.as_op.append(op)
+        self.as_t.append(turret_ls)
+        self.as_w.append(wall_ls)
+        self.as_s.append(support_ls)
+
+    def deploy(self, game_state):
+        for op, turret_ls, wall_ls, support_ls in zip(self.as_op, self.as_t, self.as_w, self.as_s):
+            if op == 'build':
+                if len(turret_ls):
+                    game_state.attempt_spawn(TURRET, turret_ls)
+                if len(wall_ls):
+                    game_state.attempt_spawn(WALL, wall_ls)
+                if len(support_ls):
+                    game_state.attempt_spawn(SUPPORT, support_ls)
+            else:
+                if len(turret_ls):
+                    game_state.attempt_upgrade(turret_ls)
+                if len(wall_ls):
+                    game_state.attempt_upgrade(wall_ls)
+                if len(support_ls):
+                    game_state.attempt_upgrade(support_ls)
+
+    def remove_all(self, game_state):
+        for op, turret_ls, wall_ls, support_ls in zip(self.as_op, self.as_t, self.as_w, self.as_s):
+            if op == 'build':
+                for turret in turret_ls:
+                    game_state.attempt_remove(turret)
+                for wall in wall_ls:
+                    game_state.attempt_remove(wall)
+                for support in support_ls:
+                    game_state.attempt_remove(support)
+
 
 class defStructure:
     def __init__(self):
@@ -30,17 +72,36 @@ class defStructure:
 
         # self.ds_door = [[22, 10]]
 
-        self.add('build', [[1, 12], [25, 12], [23, 11], [20, 10]], [[0, 13], [26, 13], [27, 13], [2, 11], [24, 11], [3, 10], [4, 9], [19, 9], [5, 8], [18, 8], [6, 7], [17, 7], [7, 6], [8, 6], [9, 6], [16, 6], [10, 5], [15, 5], [11, 4], [14, 4], [12, 3], [13, 3]], [])
-        
-        self.add('build', [[23, 12], [26, 12], [21, 11]], [[24, 13], [24, 12]], [])
+        self.important_structure = []
 
-        self.add('build', [[21, 12], [19, 11], [20, 11], [21, 10], [23, 10], [23, 9], [22, 8]], [[23, 13], [25, 13], [18, 12], [19, 12], [20, 12], [24, 10]], [])
-        
-        self.add('upgrade', [[1, 12]], [[0, 13], [2, 11], [3, 10], [4, 9]], [])
-        
-        self.add('upgrade', [[1, 12], [25, 12], [23, 11], [20, 10], [23, 12], [26, 12], [21, 11], [21, 12], [19, 11], [20, 11], [21, 10], [23, 10], [23, 9], [22, 8]], [], [])
+        self.add('build', [[1, 12], [25, 12], [23, 11], [20, 10]],
+                 [[0, 13], [26, 13], [27, 13], [2, 11], [24, 11], [3, 10], [4, 9], [19, 9], [5, 8], [18, 8], [6, 7],
+                  [17, 7], [7, 6], [8, 6], [9, 6], [16, 6], [10, 5], [15, 5], [11, 4], [14, 4], [12, 3], [13, 3]], [])
 
-        self.add('upgrade', [], [[23, 13], [24, 13], [25, 13], [26, 13], [27, 13], [18, 12], [19, 12], [20, 12], [24, 12], [24, 11], [24, 10]], [])
+        self.add('build', [[23, 12], [21, 11], [25, 11]], [[24, 13], [24, 12], [26, 12]], [])
+        self.add('build', [], [[1, 13], [2, 13]], [])
+        self.add('build', [[2, 12]], [], [])
+
+        self.add('build', [[21, 12], [19, 11], [20, 11]],
+                 [[23, 13], [25, 13], [18, 12], [19, 12], [20, 12]], [])
+
+        self.add('upgrade', [], [[0, 13], [26, 13], [27, 13], [2, 11], [3, 10], [4, 9]], [])
+
+        self.add('build', [[21, 10], [23, 10], [23, 9], [22, 8]],
+                 [[24, 10]], [])
+
+        self.add('upgrade', [[1, 12]], [], [])
+
+        self.add('upgrade',
+                 [[1, 12], [25, 12], [23, 12], [19, 11], [20, 10], [21, 12], [23, 11], [21, 11], [25, 11], [20, 11],
+                  [21, 10], [23, 10], [23, 9], [22, 8]], [], [])
+
+        self.add('upgrade', [], [[1, 13], [2, 13]], [])
+        self.add('upgrade', [[2, 12]], [], [])
+
+        self.add('upgrade', [],
+                 [[23, 13], [24, 13], [25, 13], [18, 12], [19, 12], [20, 12], [24, 12], [24, 11],
+                  [26, 12], [24, 10]], [])
 
         self.add('build', [], [], [[15, 6]])
 
@@ -60,25 +121,25 @@ class defStructure:
         self.ds_w.append(wall_ls)
         self.ds_s.append(support_ls)
 
-    # def rebuild(self, game_state):
-    #     for turret_ls in self.ds_t:
-    #         for turret in turret_ls:
-    #             st = game_state.contains_stationary_unit(turret)
-    #             if st == False:
-    #                 continue
-    #             if (st.upgraded) and (st.health < 0.5 * st.max_health):
-    #                 game_state.attempt_remove(turret)
-    #             if (not st.upgraded) and (st.health < 0.8 * st.max_health):
-    #                 game_state.attempt_remove(turret)
-    #     for wall_ls in self.ds_w:
-    #         for wall in wall_ls:
-    #             st = game_state.contains_stationary_unit(wall)
-    #             if st == False:
-    #                 continue
-    #             if (st.upgraded) and (st.health < 0.75 * st.max_health):
-    #                 game_state.attempt_remove(wall)
-    #             if (not st.upgraded) and (st.health < 0.9 * st.max_health):
-    #                 game_state.attempt_remove(wall)
+    def rebuild(self, game_state):
+        for wall_ls in self.ds_w:
+            for wall in wall_ls:
+                st = game_state.contains_stationary_unit(wall)
+                if st == False:
+                    continue
+                if (st.upgraded) and (st.health < 0.5 * st.max_health):
+                    game_state.attempt_remove(wall)
+                if (not st.upgraded) and (st.health < 0.7 * st.max_health):
+                    game_state.attempt_remove(wall)
+        for turret_ls in self.ds_t:
+            for turret in turret_ls:
+                st = game_state.contains_stationary_unit(turret)
+                if st == False:
+                    continue
+                # if (st.upgraded) and (st.health < 0.5 * st.max_health):
+                #     game_state.attempt_remove(turret)
+                if (not st.upgraded) and (st.health < 0.3 * st.max_health):
+                    game_state.attempt_remove(turret)
 
     # def processAttackSig(self, this_round_attack, next_round_attack, game_state):
     #     if not this_round_attack:
@@ -103,6 +164,47 @@ class defStructure:
                 if len(support_ls):
                     game_state.attempt_upgrade(support_ls)
 
+    def remove_all(self, game_state):
+        for op, turret_ls, wall_ls, support_ls in zip(self.ds_op, self.ds_t, self.ds_w, self.ds_s):
+            if op == 'build':
+                for turret in turret_ls:
+                    game_state.attempt_remove(turret)
+                for wall in wall_ls:
+                    game_state.attempt_remove(wall)
+                for support in support_ls:
+                    game_state.attempt_remove(support)
+
+    def all_SP(self, game_state):
+        all_sp = game_state.get_resource(0)
+        for op, turret_ls, wall_ls, support_ls in zip(self.ds_op, self.ds_t, self.ds_w, self.ds_s):
+            if op == 'build':
+                for turret in turret_ls:
+                    st = game_state.contains_stationary_unit(turret)
+                    if st == False:
+                        continue
+                    if st.upgraded:
+                        all_sp += (st.health / st.max_health) * 0.9 * 6
+                    else:
+                        all_sp += (st.health / st.max_health) * 0.97 * 2
+                for wall in wall_ls:
+                    st = game_state.contains_stationary_unit(wall)
+                    if st == False:
+                        continue
+                    if st.upgraded:
+                        all_sp += (st.health / st.max_health) * 0.9 * 2
+                    else:
+                        all_sp += (st.health / st.max_health) * 0.97 * 1
+                for support in support_ls:
+                    st = game_state.contains_stationary_unit(support)
+                    if st == False:
+                        continue
+                    if st.upgraded:
+                        all_sp += (st.health / st.max_health) * 0.9 * 8
+                    else:
+                        all_sp += (st.health / st.max_health) * 0.97 * 4
+        return all_sp
+
+
 
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
@@ -112,8 +214,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         gamelib.debug_write('Random seed: {}'.format(seed))
 
     def on_game_start(self, config):
-        """ 
-        Read in config and perform any initial setup here 
+        """
+        Read in config and perform any initial setup here
         """
         gamelib.debug_write('Configuring your custom algo strategy...')
         self.config = config
@@ -130,6 +232,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.scored_on_locations = []
 
         self.ds = defStructure()
+        self.atks = atkStructure()
+        self.special_attack_flag = False
 
     def on_turn(self, turn_state):
         """
@@ -163,11 +267,28 @@ class AlgoStrategy(gamelib.AlgoCore):
         If there are no stationary units to attack in the front, we will send Scouts to try and score quickly.
         """
 
-        cur_flag, future_flag = self.attack(game_state)
-        self.defend(game_state, cur_flag, future_flag)
+        if self.special_attack_flag:
+            self.special_attack_flag = False
+            self.atks.deploy(game_state)
+            self.atks.remove_all(game_state)
+            #crazy dog
+            scout_spawn_location_options = [[13, 0]]
+            best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
+
+            while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(best_location) > 0:
+                game_state.attempt_spawn(SCOUT, scout_spawn_location_options)
+
+        else:
+            if self.ds.all_SP(game_state) >= 56 and game_state.get_resource(1) >= 20:
+                self.special_attack_flag = True
+                self.ds.remove_all(game_state)
+            else:
+                self.ds.deploy(game_state)
+                # self.attack(game_state)
+            
 
         """
-        
+
         # First, place basic defenses
         self.build_defences(game_state)
         # Now build reactive defenses based on where the enemy scored
@@ -198,15 +319,15 @@ class AlgoStrategy(gamelib.AlgoCore):
                 game_state.attempt_spawn(SUPPORT, support_locations)
         """
 
-    def defend(self, game_state, cur_flag, future_flag):
-        # self.ds.processAttackSig(cur_flag, future_flag, game_state)
-        # self.ds.rebuild(game_state)
-        self.ds.deploy(game_state)
+    # def defend(self, game_state, cur_flag, future_flag):
+    #     # self.ds.processAttackSig(cur_flag, future_flag, game_state)
+    #     # self.ds.rebuild(game_state)
+    #     self.ds.deploy(game_state)
 
     def attack(self, game_state):
         others_mp = game_state.get_resource(MP, 1)
-        self.stall_with_interceptors(game_state, others_mp // 6)
-        
+        self.stall_with_interceptors(game_state, others_mp // 10)
+
         cur_flag = False
         future_flag = False
         if game_state.turn_number % 4 == 0:
