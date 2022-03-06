@@ -33,12 +33,12 @@ class atkStructure:
         self.add('build', [[23, 13], [24, 13]],
                  [[0, 13], [22, 13], [25, 13], [1, 12], [2, 11], [3, 10], [4, 9], [5, 8], [6, 7],
                   [7, 6], [8, 5], [9, 4], [15, 4], [10, 3], [14, 3], [11, 2], [13, 2], [12, 1]],
-                 [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8], [19, 7], [18, 6], [17, 5], [16, 4]])
+                 [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8], [19, 7], [18, 6], [17, 5], [16, 4], [22, 11], [22, 12], [23, 12]])
         
         self.add('upgrade', [[23, 13], [24, 13]], [[22, 13], [25, 13]], [])
 
         self.add('upgrade', [], [],
-                 [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8]])
+                 [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8], [19, 7], [18, 6], [17, 5], [16, 4], [22, 11], [22, 12], [23, 12]])
 
     def add(self, op, turret_ls, wall_ls, support_ls):
         self.as_op.append(op)
@@ -85,6 +85,7 @@ class defStructure:
         self.ds_s = []
 
         # self.ds_door = [[22, 10]]
+        self.rebuild_points = [[0, 13], [27, 13], [1, 13], [26, 13]]
 
         self.important_structure = []
 
@@ -135,25 +136,33 @@ class defStructure:
         self.ds_w.append(wall_ls)
         self.ds_s.append(support_ls)
 
-    # def rebuild(self, game_state):
-    #     for turret_ls in self.ds_t:
-    #         for turret in turret_ls:
-    #             st = game_state.contains_stationary_unit(turret)
-    #             if st == False:
-    #                 continue
-    #             if (st.upgraded) and (st.health < 0.5 * st.max_health):
-    #                 game_state.attempt_remove(turret)
-    #             if (not st.upgraded) and (st.health < 0.8 * st.max_health):
-    #                 game_state.attempt_remove(turret)
-    #     for wall_ls in self.ds_w:
-    #         for wall in wall_ls:
-    #             st = game_state.contains_stationary_unit(wall)
-    #             if st == False:
-    #                 continue
-    #             if (st.upgraded) and (st.health < 0.75 * st.max_health):
-    #                 game_state.attempt_remove(wall)
-    #             if (not st.upgraded) and (st.health < 0.9 * st.max_health):
-    #                 game_state.attempt_remove(wall)
+    def rebuild(self, game_state):
+        for p in self.rebuild_points:
+            st = game_state.contains_stationary_unit(p)
+            if st == False:
+                continue
+            if (st.upgraded) and (st.health < 0.85 * st.max_health):
+                game_state.attempt_remove(p)
+            if (not st.upgraded) and (st.health < 0.95 * st.max_health):
+                game_state.attempt_remove(p)
+        # for turret_ls in self.ds_t:
+        #     for turret in turret_ls:
+        #         st = game_state.contains_stationary_unit(turret)
+        #         if st == False:
+        #             continue
+        #         if (st.upgraded) and (st.health < 0.5 * st.max_health):
+        #             game_state.attempt_remove(turret)
+        #         if (not st.upgraded) and (st.health < 0.8 * st.max_health):
+        #             game_state.attempt_remove(turret)
+        # for wall_ls in self.ds_w:
+        #     for wall in wall_ls:
+        #         st = game_state.contains_stationary_unit(wall)
+        #         if st == False:
+        #             continue
+        #         if (st.upgraded) and (st.health < 0.75 * st.max_health):
+        #             game_state.attempt_remove(wall)
+        #         if (not st.upgraded) and (st.health < 0.9 * st.max_health):
+        #             game_state.attempt_remove(wall)
 
     # def processAttackSig(self, this_round_attack, next_round_attack, game_state):
     #     if not this_round_attack:
