@@ -28,13 +28,21 @@ class atkStructure:
         self.as_w = []
         self.as_s = []
 
-        self.add('build', [],
-                 [[0, 13], [22, 13], [23, 13], [24, 13], [25, 13], [1, 12], [2, 11], [3, 10], [4, 9], [5, 8], [6, 7],
+        self.attack_path = [[26, 13], [27, 13], [25, 12], [26, 12], [24, 11], [25, 11], [23, 10], [24, 10], [22, 9],
+                            [23, 9], [21, 8], [22, 8], [20, 7], [21, 7], [19, 6], [20, 6], [18, 5], [19, 5], [17, 4],
+                            [18, 4], [16, 3], [17, 3], [15, 2], [16, 2], [13, 1], [14, 1], [15, 1], [13, 0], [14, 0]]
+
+        self.add('build', [[23, 13], [24, 13]],
+                 [[0, 13], [22, 13], [25, 13], [1, 12], [2, 11], [3, 10], [4, 9], [5, 8], [6, 7],
                   [7, 6], [8, 5], [9, 4], [15, 4], [10, 3], [14, 3], [11, 2], [13, 2], [12, 1]],
-                 [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8], [19, 7], [18, 6], [17, 5], [16, 4]])
+                 [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8], [19, 7], [18, 6], [17, 5], [16, 4], [22, 11],
+                  [22, 12], [23, 12]])
+
+        self.add('upgrade', [[23, 13], [24, 13]], [[22, 13], [25, 13]], [])
 
         self.add('upgrade', [], [],
-                 [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8]])
+                 [[24, 12], [23, 11], [22, 10], [21, 9], [20, 8], [19, 7], [18, 6], [17, 5], [16, 4], [22, 11],
+                  [22, 12], [23, 12]])
 
     def add(self, op, turret_ls, wall_ls, support_ls):
         self.as_op.append(op)
@@ -69,6 +77,9 @@ class atkStructure:
                 for support in support_ls:
                     game_state.attempt_remove(support)
 
+    def get_all_structure(self):
+        return self.as_t, self.as_w, self.as_s, self.attack_path
+
 
 class defStructure:
     def __init__(self):
@@ -78,8 +89,7 @@ class defStructure:
         self.ds_s = []
 
         # self.ds_door = [[22, 10]]
-
-        self.important_structure = []
+        self.rebuild_points = [[0, 13], [27, 13], [1, 13], [26, 13]]
 
         self.add('build', [[1, 12], [25, 12], [23, 11], [20, 10]],
                  [[0, 13], [26, 13], [27, 13], [2, 11], [24, 11], [3, 10], [4, 9], [19, 9], [5, 8], [18, 8], [6, 7],
@@ -128,6 +138,16 @@ class defStructure:
         self.ds_w.append(wall_ls)
         self.ds_s.append(support_ls)
 
+    def rebuild(self, game_state):
+        for p in self.rebuild_points:
+            st = game_state.contains_stationary_unit(p)
+            if st == False:
+                continue
+            if (st.upgraded) and (st.health < 0.85 * st.max_health):
+                game_state.attempt_remove(p)
+            if (not st.upgraded) and (st.health < 0.95 * st.max_health):
+                game_state.attempt_remove(p)
+
     # def rebuild(self, game_state):
     #     for turret_ls in self.ds_t:
     #         for turret in turret_ls:
@@ -171,15 +191,17 @@ class defStructure:
                 if len(support_ls):
                     game_state.attempt_upgrade(support_ls)
 
-    def remove_all(self, game_state):
-        for op, turret_ls, wall_ls, support_ls in zip(self.ds_op, self.ds_t, self.ds_w, self.ds_s):
-            if op == 'build':
-                for turret in turret_ls:
-                    game_state.attempt_remove(turret)
-                for wall in wall_ls:
-                    game_state.attempt_remove(wall)
-                for support in support_ls:
-                    game_state.attempt_remove(support)
+    def remove_ls(self, game_state, as_t, as_w, as_s, attack_path):
+        for turret_ls, wall_ls, support_ls in zip(as_t, as_w, as_s):
+            for turret in turret_ls:
+                game_state.attempt_remove(turret)
+            for wall in wall_ls:
+                game_state.attempt_remove(wall)
+            for support in support_ls:
+                game_state.attempt_remove(support)
+        for p in attack_path:
+            game_state.attempt_remove(p)
+
 
     def all_SP(self, game_state):
         all_sp = game_state.get_resource(0)
@@ -264,6 +286,16 @@ class AlgoStrategy(gamelib.AlgoCore):
     strategy and can safely be replaced for your custom algo.
     """
 
+    def count_player_structures_point(self, game_state, player):
+        total_num = 0
+        for point in game_state.game_map:
+            if game_state.contains_stationary_unit(point):
+                for unit in game_state.game_map[point]:
+                    if unit.player_index == player:
+                        total_num += 1
+
+        return total_num
+
     # 主要逻辑
     def starter_strategy(self, game_state):
         """
@@ -272,7 +304,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         For offense we will use long range demolishers if they place stationary units near the enemy's front.
         If there are no stationary units to attack in the front, we will send Scouts to try and score quickly.
         """
-        if game_state.turn_number <= 20:
+        if game_state.turn_number <= 25:
             cur_flag, future_flag = self.attack(game_state)
             self.defend(game_state, cur_flag, future_flag)
         else:
@@ -284,11 +316,11 @@ class AlgoStrategy(gamelib.AlgoCore):
                 # 发起突围
                 self.attack_right_corner(game_state)
             else:
+                self.ds.deploy(game_state)
                 if self.check_attack_right_corner(game_state):
                     self.special_attack_flag = True
-                    self.ds.remove_all(game_state)
-                else:
-                    self.ds.deploy(game_state)
+                    as_t, as_w, as_s, attack_path = self.atks.get_all_structure()
+                    self.ds.remove_ls(game_state, as_t, as_w, as_s, attack_path)
 
                 # interceptor 去吃
                 others_mp = game_state.get_resource(MP, 1)
@@ -317,11 +349,11 @@ class AlgoStrategy(gamelib.AlgoCore):
             point_instant = game_state.contains_stationary_unit(point)
             if not point_instant:
                 continue
-
             if point_instant.unit_type == WALL:
-                defend_point += 120 if point_instant.upgraded else 60
+                tmp = 120 if point_instant.upgraded else 60
+                defend_point = max(defend_point, tmp)
             if point_instant.unit_type == TURRET:
-                defend_point += 60
+                defend_point = max(defend_point, 60)
         return defend_point
 
     def check_attack_right_corner(self, game_state):
@@ -335,18 +367,19 @@ class AlgoStrategy(gamelib.AlgoCore):
             return False
 
         others_mp = game_state.get_resource(MP, 1)
-        my_mp = game_state.get_resource(MP, 0)
+        my_future_mp = game_state.project_future_MP()
 
         if others_mp >= 12:
             return False
 
-        harm_point = self.check_right_corner_attacker(game_state)
-        defend_point = self.check_right_corner_defender(game_state)
-
-        num_demolisher = math.ceil(defend_point / 8)
+        if self.count_player_structures_point(game_state, 1) >= 45:
+            num_demolisher = 8
+        else:
+            defend_point = self.check_right_corner_defender(game_state)
+            num_demolisher = math.ceil(defend_point / 8 / 2)
 
         # 当前移动点不够造出足够破坏者
-        if num_demolisher * 3 <= my_mp:
+        if (num_demolisher) * 3 >= my_future_mp:
             return False
         return True
 
@@ -354,16 +387,19 @@ class AlgoStrategy(gamelib.AlgoCore):
         others_mp = game_state.get_resource(MP, 1)
         my_mp = game_state.get_resource(MP, 0)
 
-        harm_point = self.check_right_corner_attacker(game_state)
+        # harm_point = self.check_right_corner_attacker(game_state)
         defend_point = self.check_right_corner_defender(game_state)
 
-        num_demolisher = math.ceil(defend_point / 8)
+        if self.count_player_structures_point(game_state, 1) >= 45:
+            num_demolisher = 8
+        else:
+            num_demolisher = math.ceil(defend_point / 8 / 2)
 
-        # 当前移动点不够造出足够破坏者
-        if num_demolisher * 3 <= my_mp:
-            return
+        start_left = False
+        if my_mp - 3 * num_demolisher < 1:
+            start_left = True
 
-        self.stall_with_demolisher(game_state, num_demolisher)
+        self.stall_with_demolisher(game_state, num_demolisher, start_left)
         self.stall_with_scout(game_state)
 
     def attack(self, game_state):
@@ -423,12 +459,16 @@ class AlgoStrategy(gamelib.AlgoCore):
         while game_state.get_resource(MP) >= game_state.type_cost(SCOUT)[MP] and len(best_location) > 0:
             game_state.attempt_spawn(SCOUT, scout_spawn_location_options)
 
-    def stall_with_demolisher(self, game_state, num):
+    def stall_with_demolisher(self, game_state, num, start_left = False):
         """
         只放置破坏者在[11, 2] ][16, 2]
         选择一个点进行放置
         """
-        scout_spawn_location_options = [[21, 7]]
+        if start_left:
+            scout_spawn_location_options = [[13, 0]]
+        else:
+            scout_spawn_location_options = [[19, 5]]
+
         best_location = self.least_damage_spawn_location(game_state, scout_spawn_location_options)
 
         while game_state.get_resource(MP) >= game_state.type_cost(DEMOLISHER)[MP] and len(
